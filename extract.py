@@ -132,7 +132,7 @@ def validate_url(url):
     if response == None:
         return url, url, 0, "", "N", "N", "N", hit("No Response"), "false"
     else:
-        print(url, get_visible_text(content))
+        #print(url, get_visible_text(content))
         return evaluate_content_for_200s(response, url, content)
 
 
@@ -318,74 +318,6 @@ def contains_setCookie(content):
         return cookie_text
     return ""
 
-#def contains_staff_keyword(content, url, title):
-#    regexs = [
-#        "executive",
-#        "(\w job|job \w)",
-#        "(\w human|human \w)",
-#        "agency",
-#        "employment",
-#        "(\w resume|resume \w)",
-#        "posting",
-#        "job search",
-#        "(\w talent|talent \w)",
-#        "(\w consutling|consulting \w)",
-#        "(\w staffing|staffing \w)",
-#        "recruit",
-#        "(\w careers|careers \w)",
-#        "(\w employment|employment \w)",
-#        "(\w headhunter|headhunter \w)",
-#        "(\w hr|hr \w)",
-#        "(\w resume|resume \w)",
-#        "head hunter",
-#        "(\w agency|agency \w)",
-#        "post",
-#        "(\w locum|locum \w)",
-#        "(\w temp|temp \w)",
-#        "recursos humanos",
-#        "ricerca(\s|\w)*personale",
-#        "startups",
-#    ]
-#    class MyKeywords(HTMLParser):
-#        def __init__(self):
-#            HTMLParser.__init__(self)
-#            self.keywords = ""
-#
-#        def handle_startendtag(self, tag, attrs):
-#            debug("HERE2")
-#            print(tag)
-#            if tag == 'meta':
-#                for k, v in attrs:
-#                    if  k == 'name' and v == 'keywords':
-#                        for k2, v2 in attrs:
-#                            if k2 == 'content':
-#                                self.keywords = v2
-#            debug("OUT")
-#
-#    parser = MyKeywords()
-#    content = content.encode('ascii', 'ignore').decode('ascii')
-#    debug(len(content))
-#    parser.feed(content)
-#    keywords = parser.keywords
-#    debug("KEYWORDS: {}".format(keywords)) 
-#    hit_words = [] 
-#    try:
-#        ls_keywords = keywords.encode('ascii', 'ignore').decode('ascii').lower().split(',')
-#        for keyword in ls_keywords:
-#            for regex in regexs:
-#                m = re.match(regex.strip(), keyword.strip())
-#                if m != None:
-#                    if regex not in hit_words:
-#                         hit_words.append(regex)
-#        if len(hit_words) == 0:
-#            return False 
-#        else:
-#            return hit(",".join(hit_words))
-#    except:
-#        debug("GOT THIS {}".format(str(hit_words)))
-#        return "STAFFING: Error retrieving keywords for {}".format(url)
-
-
 def evaluate_content_for_200s(response, url, content):
     """ Input should be valid response object and content in string format.
         * Check header in case it is not text content
@@ -414,17 +346,24 @@ def evaluate_content_for_200s(response, url, content):
     
     
     try:
-        # to set the env flag on hadoop add '-cmdenv URL_FULL_CONTENT=True'
-        full_response = eval(os.environ["URL_FULL_CONTENT"])
-    except Exception as e:
+        full_response   = eval(os.environ.get("URL_FULL_CONTENT",    None))
+    except:
         full_response = False
-    
-    if full_response:
+    try:
+        visible_content = eval(os.environ.get("URL_VISIBLE_CONTENT", None))
+    except:
+        visible_content = False
+
+    if visible_content:
+        debug("RETURN READABLE CONTENT ONLY")
+        clean_content = get_visible_text(content)
+        return url, response.url, response.status_code, "", "N", "N", "N", hit(clean_content), "true"
+    elif full_response:
         debug("RETURN FULL CONTENT TO DISK FOR EVAL 200s")
         clean_content = re.compile(r'[\n\r\t\s]+').sub(' ', content.lower())
         return url, response.url, response.status_code, "", "N", "N", "N", hit(clean_content), "true"
     else:
-        return url, response.url, response.status_code, "", "N", "N", "N", hit("No sale/junk patterns, nor bad title found"), "true"
+        return url, response.url, response.status_code, "", "N", "N", "N", hit("valid url page"), "true"
 
 
 
