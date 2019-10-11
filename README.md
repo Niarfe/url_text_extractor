@@ -52,3 +52,9 @@ echo google.com | python extract.py
 Full content takes presedence over visible, so if both are set full is returned
 
 To clear the flags use the unset.sh with `source unset.sh`
+
+### To work on a file of urls
+```
+cat test_urls.txt | python extract.py  > content.tsv
+# then you can open content.csv with excel or a csv viewer
+```
