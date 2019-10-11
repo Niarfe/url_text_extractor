@@ -251,7 +251,7 @@ def attempt_connection(url, cookie=""):
             requests.packages.urllib3.exceptions.LocationParseError, UnicodeDecodeError, ProxyError,
             SSLError, MissingSchema, InvalidSchema, InvalidURL, ChunkedEncodingError, ContentDecodingError,
             StreamConsumedError, RetryError) as e:
-        debug(str(e.message))
+        debug(str(e))
         return None
 
 
